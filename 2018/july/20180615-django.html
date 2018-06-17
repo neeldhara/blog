@@ -1,12 +1,28 @@
 ---
-draft: yes
 title: "My First Django App"
 date: 2018-07-23T21:13:14-05:00
 categories: ["webapps"]
 tags: ["Django", "Python", "project"]
+slug: "firstdjangoapp"
+output:
+  blogdown::html_page:
+    toc: true
 ---
 
 
+<div id="TOC">
+<ul>
+<li><a href="#quickstart">Quickstart</a></li>
+<li><a href="#setting-up-templates">Setting up Templates</a></li>
+<li><a href="#starting-clean">Starting Clean</a></li>
+<li><a href="#template-inheritance">Template Inheritance</a></li>
+<li><a href="#setting-up-the-database">Setting up the Database</a></li>
+<li><a href="#displaying-dynamic-content">Displaying Dynamic Content</a></li>
+<li><a href="#filtering-dynamic-content">Filtering Dynamic Content</a></li>
+<li><a href="#finishing-touches">Finishing Touches</a></li>
+<li><a href="#beyond-the-first-app">Beyond the First App</a></li>
+</ul>
+</div>
 
 <p>In preparing for a session in a Python workshop, I finally got around to exploring the process of building a webapp powered by Django. I picked up the excellent <a href="https://hellowebbooks.com/learn-django/">Hello Web App</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> book by <a href="https://limedaring.com/">Tracy Osborn</a> for my preparation. In this post, I am going to document the process - just in case I have to do this again ☕️</p>
 <p>The tutorial in <em>Hello Web App</em> goes over the process of building a generic “collection of things” with Django<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. In this exposition, I’ll focus on a more concrete example, because it was more fun for me to build a tangible concept that I might actually use later.</p>

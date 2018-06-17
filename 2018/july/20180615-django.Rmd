@@ -1,9 +1,12 @@
 ---
-draft: yes
 title: "My First Django App"
 date: 2018-07-23T21:13:14-05:00
 categories: ["webapps"]
 tags: ["Django", "Python", "project"]
+slug: "firstdjangoapp"
+output:
+  blogdown::html_page:
+    toc: true
 ---
 
 In preparing for a session in a Python workshop, I finally got around to exploring the process of building a webapp powered by Django. I picked up the excellent [Hello Web App](https://hellowebbooks.com/learn-django/)^[I'd happily recommend this book for anyone with a little HTML/CSS exposure and some familiarity with basic Python concepts.] book by [Tracy Osborn](https://limedaring.com/) for my preparation. In this post, I am going to document the process - just in case I have to do this again ☕️
