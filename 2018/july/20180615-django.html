@@ -1,0 +1,320 @@
+---
+draft: yes
+title: "My First Django App"
+date: 2018-07-23T21:13:14-05:00
+categories: ["webapps"]
+tags: ["Django", "Python", "project"]
+---
+
+
+
+<p>In preparing for a session in a Python workshop, I finally got around to exploring the process of building a webapp powered by Django. I picked up the excellent <a href="https://hellowebbooks.com/learn-django/">Hello Web App</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> book by <a href="https://limedaring.com/">Tracy Osborn</a> for my preparation. In this post, I am going to document the process - just in case I have to do this again ☕️</p>
+<p>The tutorial in <em>Hello Web App</em> goes over the process of building a generic “collection of things” with Django<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. In this exposition, I’ll focus on a more concrete example, because it was more fun for me to build a tangible concept that I might actually use later.</p>
+<p>So, I am going to build a collection of talk announcements at IIT Gandhinagar, which I intend to be displayed, on the frontend, as a slideshow. I figure that this website can then be loaded up on any internet-connected display and serve as a virtual notice board. For the frontend design, I’m going to be stealing the <a href="https://webslides.tv/">Webslides</a> framework, which is a really clean HTML/CSS template for making slideshows powered by Javascript.</p>
+<div id="quickstart" class="section level2">
+<h2>Quickstart</h2>
+<p>I’m going to handwave the bit about installation. Briefly, I setup Django v2.0.4 in a virtual environment, put the codebase in a git repository, and initialized a Django project via:</p>
+<p><code>django-admin startproject announceiitgn .</code></p>
+<p>and then a Django app via:</p>
+<p><code>django-admin startapp talks</code></p>
+<p>It’s also important to add this app to <code>settings.py</code>, like so:</p>
+<pre><code>INSTALLED_APPS = [
+    &#39;talks&#39;,
+    &#39;django.contrib.admin&#39;,
+    &#39;django.contrib.auth&#39;,
+    &#39;django.contrib.contenttypes&#39;,
+    &#39;django.contrib.sessions&#39;,
+    &#39;django.contrib.messages&#39;,
+    &#39;django.contrib.staticfiles&#39;,
+]</code></pre>
+<p>and also run a migration command to account for an initial setup for the databases (if you skip this step, Django will prompt you to do it anyway - as I found out by forgetting 😎):</p>
+<p><code>python manage.py migrate</code></p>
+<p>Finally, see your app by running the server! 🎉</p>
+<p><code>python manage.py runserver</code></p>
+<p>You should see a neat little success page if you navigate to something like <code>http://127.0.0.1:8000/</code> (the exact URL should be in your console).</p>
+<p>If you are not sure how to get to this point, I’d suggest looking up an installation/setup guide such as this one.</p>
+</div>
+<div id="setting-up-templates" class="section level2">
+<h2>Setting up Templates</h2>
+<p>The first step is to setup a basic HTML template that becomes the frontend. We go into our app directory (which, in my case, is <code>talks</code>) and then make a <code>templates</code> directory inside it, where I make a simple <code>index.html</code> file. Instead of using a skeleton file here, I’m going to take a deep breath and throw in the index.html from the webslides codebase. At this point I know it won’t be a pretty sight, but I’m also optimistic that I can iron it out as I go along 🤕</p>
+<p>I’m going to head over to urls.py and add the following import:</p>
+<p><code>from talks import views</code></p>
+<p>and then add the following item to <code>urlpatterns</code>, which I understand only vaguely at this point:</p>
+<p><code>path('',views.index,name='home'),</code></p>
+<p>We now need to make sure that <code>views.index</code> actually makes sense, so switch to <code>views.py</code> in the <code>talks</code> directory and add the following:</p>
+<pre class="python"><code>def index(request):
+    return render(request,&#39;index.html&#39;)</code></pre>
+<p>Note that <code>render</code> has already been imported for you from <code>django.shortcuts</code>. For now, I sense that this is the plumbing connecting the directive in <code>urls.py</code> to the meat in the <code>templates</code> directory. Now, navigating again to the webapp, while it’s not exactly pretty (just as predicted), but at least you can see that all the connections are working as intended:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-01.png" />
+
+</div>
+<p>So it’s time to add the static supporting files for the webslides template. I’m going to create the folder <code>static</code> inside the <code>talks</code> folder. Inside the <code>static</code> folder, copy over the folders <code>css</code>, <code>js</code> and <code>images</code> from the webslides template bundle. Now, we need to make sure that our <code>index.html</code> loads these supporting files from the appropriate location. This is a critical step and will completely transform the way the website is rendered if done correctly. So what we are going to do is add the following line to the top of the file:</p>
+<p><code>{% load staticfiles %}</code></p>
+<p>Next, find all instances of anything that looks like:</p>
+<pre class="html"><code>&lt;link rel=&quot;stylesheet&quot; type=&#39;text/css&#39; media=&#39;all&#39;
+href=&quot;static/css/webslides.css&quot;&gt;</code></pre>
+<p>and change it to:</p>
+<pre class="html"><code>&lt;link rel=&quot;stylesheet&quot; type=&#39;text/css&#39; media=&#39;all&#39;
+href=&quot;{% static &#39;css/webslides.css&#39; %}&quot;&gt;</code></pre>
+<p>Careful with getting the quotes and the template tags in place accurately! Also remember to attack every instance of a reference to anything the <code>static/</code> directory. If you are comfortable with it, this is a near-one-shot find and replace with a regex search.</p>
+<p>You could also make this work by using relative paths (i.e., changing the paths to <code>../css/webslides.css</code>), but using the Django template tags as above is more robust to changes in the directory structure — so in case your static files folder moves around, your code doesn’t have to change.</p>
+<p>Now, for the moment of truth, restart the server:</p>
+<p><code>python manage.py runserver</code></p>
+<p>and revisit your site:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-02.png" />
+
+</div>
+<p>So there! We’ve managed to render the webslides deck inside of our Django project - which is an awesome start already: 🎉</p>
+</div>
+<div id="starting-clean" class="section level2">
+<h2>Starting Clean</h2>
+<p>Of course, we don’t quite want the <code>index.html</code> file to hold this particular content. I’m going to quickly pick out a slide (from the webslides demonstrations) that looks nice for displaying talk announcements, and get rid of all the original sections and just use this one. Here’s the HTML for the sections that I ended up with, populated with some sample content:</p>
+<pre class="html"><code>&lt;section&gt;
+    &lt;div class=&quot;wrap&quot;&gt;
+    &lt;div class=&quot;card-30 bg-white&quot;&gt;
+    &lt;div class=&quot;flex-content&quot;&gt;
+        &lt;h2&gt;Talk Title 1
+        &lt;/h2&gt;
+        &lt;p&gt;Speaker Name &amp; Affiliation&lt;/p&gt;
+        &lt;p class=&quot;text-intro&quot;&gt;A brief abstract of the talk.
+        &lt;/p&gt;
+        &lt;ul class=&quot;description&quot;&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Date:&lt;/strong&gt; 16 June 2018&lt;/li&gt;
+        &lt;li&gt;
+            &lt;strong class=&quot;text-label&quot;&gt;Time:&lt;/strong&gt; 10:00 AM
+        &lt;/li&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Venue:&lt;/strong&gt; Academic Block 1, Room 101&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;!-- end .flex-content--&gt;
+    &lt;/div&gt;
+    &lt;!-- .end .card-50 --&gt;
+    &lt;/div&gt;
+    &lt;!-- .end .wrap --&gt;
+&lt;/section&gt;</code></pre>
+<p>Of course, this data would eventually be passed into the template from the database, but let’s render our site anyway and check it out once more before moving on:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-03.png" />
+
+</div>
+<p>It’s not hard to customize the header from <code>index.html</code>, but I am postponing that for a little bit later.</p>
+</div>
+<div id="template-inheritance" class="section level2">
+<h2>Template Inheritance</h2>
+<p>It’s useful to have global-ish aspects of our template separated out into a (presumably traditionally named) <code>base.html</code> template, so we can make spin-offs easily. For example, when we have interviews we like to display room numbers for candidates interviewing for different disciplines on the same day, and some related general information. This page will carry the same overall structure, but we might want to use a slightly different combination of section templates. So let’s rip out the generic stuff from <code>index.html</code> and move it to <code>base.html</code>:</p>
+<pre class="html"><code>{% load staticfiles %}
+...bunch of webslides header stuff...
+
+    &lt;main role=&quot;main&quot;&gt;
+      &lt;article id=&quot;webslides&quot; class=&quot;vertical&quot;&gt;
+
+        {% block content %}
+        {% endblock content %}
+
+      &lt;/article&gt;
+      &lt;!-- end article --&gt;
+    &lt;/main&gt;
+    &lt;!-- end main --&gt;
+
+...bunch of webslides footer stuff...</code></pre>
+<p>(Please don’t copy-paste this, work with your own webslides template if you are literally following along! I’ve not dislpayed a bunch of stuff from their index.html in the interest of space.)</p>
+<p>Meanwhile, your <code>index.html</code> now looks like this:</p>
+<pre class="html"><code>{% extends &#39;base.html&#39; %}
+{% load staticfiles %}
+{% block content %}
+&lt;section&gt;
+  &lt;div class=&quot;wrap&quot;&gt;
+  &lt;div class=&quot;card-30 bg-white&quot;&gt;
+    &lt;div class=&quot;flex-content&quot;&gt;
+      &lt;h2&gt;Talk Title 1
+      &lt;/h2&gt;
+      &lt;p&gt;Speaker Name &amp; Affiliation&lt;/p&gt;
+      &lt;p class=&quot;text-intro&quot;&gt;A brief abstract of the talk.
+      &lt;/p&gt;
+      &lt;ul class=&quot;description&quot;&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Date:&lt;/strong&gt; 16 June 2018&lt;/li&gt;
+        &lt;li&gt;
+          &lt;strong class=&quot;text-label&quot;&gt;Time:&lt;/strong&gt; 10:00 AM
+        &lt;/li&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Venue:&lt;/strong&gt; Academic Block 1, Room 101&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;!-- end .flex-content--&gt;
+  &lt;/div&gt;
+  &lt;!-- .end .card-50 --&gt;
+  &lt;/div&gt;
+  &lt;!-- .end .wrap --&gt;
+&lt;/section&gt;
+{% endblock content %}</code></pre>
+<p>Remember to make sure that the line:</p>
+<p><code>{% extends 'base.html' %}</code></p>
+<p>is the very first thing in your file, and that you add:</p>
+<p><code>{% load staticfiles %}</code></p>
+<p>in case you plan to use anything in your static directory in <code>index.html</code>. The power of inheritance becomes a little more evident when you have other files piggybacking on <code>base.html</code>, but I’ll leave that to your imagination for now.</p>
+<!-- ##Passing Values to the Template -->
+</div>
+<div id="setting-up-the-database" class="section level2">
+<h2>Setting up the Database</h2>
+<p>We’re going to start by creating an admin user, by typing the following into the commandline:</p>
+<p><code>python manage.py createsuperuser</code></p>
+<p>This prompts for a username, email and password - nothing out of the ordinary here. Next up is a critical point in this whole exercise, which is to setup the model, or the database schema, for the items we wanted to display. From the HTML above you might have guessed that what I want to define at this point is a talk object with the following attributes:</p>
+<ol style="list-style-type: decimal">
+<li>Talk Title</li>
+<li>Speaker Name</li>
+<li>Venue</li>
+<li>Date</li>
+<li>Time</li>
+</ol>
+<p>To capture this, add the code below to <code>models.py</code>:</p>
+<pre class="python"><code>class Talk(models.Model):
+    title = models.CharField(max_length=255)
+    speaker = models.CharField(max_length=255)
+    description = models.TextField()
+    venue = models.CharField(max_length=255)
+    date = models.DateField()
+    time = models.TimeField()</code></pre>
+<p>The field types should be self-explanatory. One type that I did not use was the <code>SlugField</code>, which can be handy if you want every talk to have its own page. For now, we’re keeping it simple. We then ask Django to pick up this updated database plan by running migrations as follows:</p>
+<p><code>python manage.py makemigrations</code> <code>python manage.py migrate</code></p>
+<p>We next get the built-in Django admin interface up to speed with information about our new database, by adding the following lines to <code>admin.py</code> in the <code>Talks</code> folder:</p>
+<pre class="python"><code>from talks.models import Talk
+
+class TalkAdmin(admin.modelAdmin):
+  model = Thing
+  list_display = (&#39;title&#39;,&#39;speaker&#39;,&#39;description&#39;,&#39;venue&#39;,&#39;date&#39;,&#39;time&#39;)
+
+admin.site.register(Talk, TalkAdmin)</code></pre>
+<p>The business with the <code>TalkAdmin</code> class is optional, but it lets you do nice things like prepopulate fields where relevan: for instance, if we had a slug field, we could have said something like:</p>
+<p><code>prepopulated_fields = {'slug'}: ('name',)}</code></p>
+<p>just after the <code>list_display</code> line above, and you could see the slug getting automatically generated in the admin interface. Speaking of admin interfaces, let’s check ours out - head over to <a href="http://127.0.0.1:8000/admin/" class="uri">http://127.0.0.1:8000/admin/</a> and login with your superuser credentials. Here’s what I see:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-04.png" />
+
+</div>
+<p>You should find your own data in the users table. But the interesting bits are in the <code>Talks</code> table, which is going to look exactly the way we modeled it above when you go to the table and click on the <code>Add Talk</code> button:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-05.png" />
+
+</div>
+<p>Now let’s go ahead and add some sample data in here:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-06.png" />
+
+</div>
+<p>I added this from the admin interface. If you like, you can setup forms for other users to add data to the database, but that’s going to be beyond the scope of our first app. For now, let’s get to tying this all together by getting the data from here to display on the frontend…</p>
+</div>
+<div id="displaying-dynamic-content" class="section level2">
+<h2>Displaying Dynamic Content</h2>
+<p>If you’ve come this far, you are now ready to pull your data into the slideshow that we setup from before. First, let’s get into <code>views.py</code>, pull the data from our database, and pass it on to our template. Modify the file so it looks like this:</p>
+<pre class="python"><code>from django.shortcuts import render
+from talks.models import Talk
+# Create your views here.
+
+def index(request):
+    talks = Talk.objects.all()
+    return render(request, &#39;index.html&#39;, {
+        &#39;talks&#39;: talks,
+    })</code></pre>
+<p>Next, let’s head back to our <code>index.html</code> file, and adapt our content block:</p>
+<pre class="html"><code>{% extends &#39;base.html&#39; %}
+{% load staticfiles %}
+{% block content %}
+
+{% for talk in talks %}
+&lt;section&gt;
+  &lt;div class=&quot;wrap&quot;&gt;
+  &lt;div class=&quot;card-30 bg-white&quot;&gt;
+    &lt;div class=&quot;flex-content&quot;&gt;
+      &lt;h2&gt;{{ talk.title }}
+      &lt;/h2&gt;
+      &lt;p&gt;{{ talk.speaker }}&lt;/p&gt;
+      &lt;p class=&quot;text-intro&quot;&gt;{{ talk.description }}
+      &lt;/p&gt;
+      &lt;ul class=&quot;description&quot;&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Date:&lt;/strong&gt; {{ talk.date }}&lt;/li&gt;
+        &lt;li&gt;
+        &lt;strong class=&quot;text-label&quot;&gt;Time:&lt;/strong&gt; {{ talk.time }}
+        &lt;/li&gt;
+        &lt;li&gt;&lt;strong class=&quot;text-label&quot;&gt;Venue:&lt;/strong&gt; {{ talk.venue }}&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;!-- end .flex-content--&gt;
+  &lt;/div&gt;
+  &lt;!-- .end .card-50 --&gt;
+  &lt;/div&gt;
+  &lt;!-- .end .wrap --&gt;
+&lt;/section&gt;
+{% endfor %}
+{% endblock content %}</code></pre>
+<p>Note that we’re now using a for loop to go over everything in talks, and replacing our static content with template tags that represent the corresponding data from the database. Django has a lot of interesting ways in which you can format your content (such as dates and times, especially, but even text strings — for instance, they can always be rendered in title case, if you like, and so on). Since the default view here is not bad, I won’t be pursuing this further - but it’s good to know that you can do <a href="https://simpleisbetterthancomplex.com/tips/2016/05/09/django-tip-2-humanize.html">cool</a> <a href="https://docs.djangoproject.com/en/dev/ref/contrib/humanize/">things</a>.</p>
+<p>Let’s check out our site now, to relish the sight of the slides populated with conent from our database:</p>
+<div class="cloudapp-embed" data-slug="3k2Y2b1k1v03">
+<a href="https://cl.ly/3k2Y2b1k1v03">Screen Recording 2018-06-16 at 11.01 AM.gif</a>
+<script async src="https://embed.cl.ly/embedded.gz.js" charset="utf-8"></script>
+</div>
+</div>
+<div id="filtering-dynamic-content" class="section level2">
+<h2>Filtering Dynamic Content</h2>
+<p>Let’s say we only want to display those talks whose date is not in the past - this is a natural ask, we don’t want our virtual notice board to be cluttered with information about talks from the past (that’s more suitable for a talk archive page), and we also don’t want to have to delete talks from the database manually (two issues with this: the first is that manual is tedious, the second is that it’s nice to keep the data — quite likely the developer of the future archive page will find it useful).</p>
+<p>One way to do this is to loop through all the talks in our template file, and setup a conditional for whether we display it. The main problem doing it this way is that we are doing waaaay more work than is called for: eventually this database will have thousands of talks, while you probably need to get hold of a dozen or so of them. The more appropriate solution is to setup what is called a <em>filter</em> when you make the database query. After some fiddling around, I finally got to this updated query in my views file:</p>
+<pre class="python"><code>talks = Talk.objects.filter(date__gte=datetime.now()).order_by(&#39;date&#39;)</code></pre>
+<p>Remember to import datetime for the above to work:</p>
+<pre class="python"><code>from datetime import datetime</code></pre>
+<p>The syntax here is almost self-explanatory: we got rid of the <code>.all()</code> and replaced it with a <code>.filter()</code> to indicate that, indeed, we <em>don’t</em> want all records but only those that match the filter criteria. Next, gte stands for greater than or equal to; <code>datetime.now()</code> refers to today’s date; while the order_by directive asks the retrieved objects to be ordered according to a particular field. You can order by this-then-that by simply adding multiple fields separated by commas, and you can reverse the order by adding a leading hyphen (or a “minus”, if you like) to the field name. Try all this out! Also: try to mess around with the query to see what happens when the query returns an empty set of records.</p>
+<p>Going back to our app, we see that the one talk that was in the past (at the time of this writing) is now gone:</p>
+<div class="cloudapp-embed" data-slug="3K3z3c3v3J1V">
+<a href='https://cl.ly/3K3z3c3v3J1V'>Screen Recording 2018-06-16 at 01.34 PM.gif</a>
+<script async src='https://embed.cl.ly/embedded.gz.js' charset='utf-8'></script>
+</div>
+</div>
+<div id="finishing-touches" class="section level2">
+<h2>Finishing Touches</h2>
+<p>One thing I didn’t touch upon was how to pass Python variables into the template. Let’s try this now, by adding a final slide that displays today’s date and a nice background image (which resides in the <code>images/</code> folder under the <code>static</code> directory). To pull out today’s date, let’s set a variable <code>currdate</code> in our views file, and pass it on to our template, like so:</p>
+<pre class="python"><code>def index(request):
+    talks = Talk.objects.filter(date__gte=datetime.now()).order_by(&#39;date&#39;)
+    currdate = datetime.now()
+    return render(request, &#39;index.html&#39;, {
+        &#39;talks&#39;: talks,
+        &#39;currdate&#39;: currdate,
+    })</code></pre>
+<p>Back to the template, as before, I picked up a nice-looking section from the vast array of webslide’s demo pages. Carefully add this section <em>after</em> the forloop block ends:</p>
+<pre class="html"><code>&lt;section class=&quot;bg-gradient-v slide-bottom&quot;&gt;
+  &lt;span class=&quot;background light&quot; style=&quot;background-image:url(&#39;{% static &#39;images/campus-bg.png&#39; %}&#39;)&quot;&gt;&lt;/span&gt;
+  &lt;div class=&quot;wrap&quot;&gt;
+    &lt;div class=&quot;content-right&quot;&gt;
+    &lt;h3 class=&quot;alignright&quot;&gt;{{ currdate|date }}&lt;/h3&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- .end .wrap --&gt;
+&lt;/section&gt;</code></pre>
+<p>Note the use of <code>{{ currdate|date }}</code> - this displays the value of the variable <code>currdate</code> but formatted so that only the date is displayed (without the trailing date instruction, this would display the date <em>and</em> the time by default). This gives us a cool final slide:</p>
+<div class="cloudapp-embed" data-slug="2h3W2t2m340w">
+<a href='https://cl.ly/2h3W2t2m340w'>Screen Recording 2018-06-16 at 01.42 PM.gif</a>
+<script async src='https://embed.cl.ly/embedded.gz.js' charset='utf-8'></script>
+</div>
+<p>Also remember to head back to <code>base.html</code> and customize the header so the social media links and the logos are relevant to your setting:</p>
+<div class="figure">
+<img src="../hellodjango-screenshot-08.png" />
+
+</div>
+</div>
+<div id="beyond-the-first-app" class="section level2">
+<h2>Beyond the First App</h2>
+<p>Our app was, by design, a largely view-only app. In most situations, however, your app will likely have users, so you would want features like:</p>
+<ol style="list-style-type: decimal">
+<li>Registration (possibly even single-sign ons)</li>
+<li>A Login Flow (optionally, also an onboarding flow)</li>
+<li>Reset Password</li>
+<li>The ability for users to view user-specific data</li>
+<li>The ability for users to add/edit/delete user-specific data</li>
+</ol>
+<p>For a lot of this you would need to invoke some kind of a customized form interface (different from Django’s built-in admin interface) that allows the user to interact with the database. Covering this is beyond the scope of our discussion, but if you would like to set these things up, I’d suggest continuing your journey with either <a href="">this Django tutorial series</a>, <a href="">the official documentation</a>, or <a href="">the Hello Web App book</a>.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>I’d happily recommend this book for anyone with a little HTML/CSS exposure and some familiarity with basic Python concepts.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Incidentally, another nice tutorial that follows this approach is <a href="https://watchandcode.com/p/practical-javascript">Practical JavaScript</a><a href="#fnref2">↩</a></p></li>
+</ol>
+</div>
