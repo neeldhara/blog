@@ -49,7 +49,7 @@ Finally, see your app by running the server! 🎉
 
 You should see a neat little success page if you navigate to something like `http://127.0.0.1:8000/` (the exact URL should be in your console).
 
-If you are not sure how to get to this point, I'd suggest looking up an installation/setup guide such as this one.
+If you are not sure how to get to this point, I'd suggest looking up an installation/setup guide such as [this one](https://docs.djangoproject.com/en/2.0/intro/tutorial01/) from the official documentation or [this one](https://tutorial.djangogirls.org/en/django_start_project/) from Django Girls.
 
 ##Setting up Templates
 
