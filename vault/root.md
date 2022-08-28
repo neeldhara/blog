@@ -2,9 +2,9 @@
 id: ik5Bi5OCTsmfKfq5JQtEB
 title: Root
 desc: ''
-updated: 1637610830605
+updated: 1661650570281
 created: 1637610830605
 ---
-# Welcome to Dendron
+# Work In Progress
 
-This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. 
+I'm in the process of moving my blog to a Dendron/NextJS setup. Hopefully, coming soon(-ish)!

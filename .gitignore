@@ -6,3 +6,4 @@ seeds
 docs
 
 .backup
+.dendron.cache.*
